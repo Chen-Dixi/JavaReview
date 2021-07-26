@@ -1,23 +1,26 @@
 package dixi.bupt;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Hashtable;
 
-import dixi.bupt.sort.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main {
 
     public static void main(String[] args) {
 	// write your code here
-        String a = "aab";
-        String b = "aab";
-
-        System.out.println(a == b);
-        a = "afv";
-        System.out.println(a == b);
-        StringBuffer sb =  new StringBuffer("This is only a");
-        Hashtable<Integer, Integer> table = new Hashtable<>();
-        HashMap<Integer, Integer> map = new HashMap<>();
-
+        String DOMAIN_REGEX = "^(?:(https?:\\/\\/)?)?[a-z0-9][a-z0-9-]{0,62}(?:\\.[a-z0-9][a-z0-9-]{0,62})+(?::"
+                + "([0-9]|[1-9]\\d{1,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5]))?$";
+        Pattern pattern = Pattern.compile(DOMAIN_REGEX);
+        List<String> matches = new ArrayList<>(Arrays.asList("www.google.com","https://www.google.com","google.com"));
+        for(String match : matches) {
+            Matcher matcher = pattern.matcher(match);
+            if (!matcher.find()) {
+                System.out.println(match);
+            }
+        }
     }
 }
