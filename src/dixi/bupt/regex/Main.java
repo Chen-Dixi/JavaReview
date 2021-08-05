@@ -1,4 +1,4 @@
-package dixi.bupt.Regex;
+package dixi.bupt.regex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,5 @@ public class Main {
                 System.out.println(match);
             }
         }
-
-
     }
 }
