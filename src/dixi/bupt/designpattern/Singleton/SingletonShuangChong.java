@@ -1,6 +1,7 @@
 package dixi.bupt.designpattern.Singleton;
 
 public class SingletonShuangChong {
+    // 双重校验锁
     private static volatile SingletonShuangChong uniqueInstance;
 
     public static SingletonShuangChong getUniqueInstance(){
