@@ -4,6 +4,7 @@ package dixi.bupt.lazyLoad;
 
 class TestClass {
     public static void main(String[] args) {
+        // 并没有加载 SubClass
         System.out.println(SubClass.value);
     }
 

@@ -21,6 +21,13 @@ public class Solution {
         int ans2 = findPath(grid, 2,2);
         System.out.println(ans2); //20
 
+//        dp[0] = true;
+//        for(int i=1;i<=n;i++)
+//            for(int j=i; j>=1; j--) {
+//                if (isInDict(word(j,i)))  //isInDict用
+//                    dp[i] = dp[j-1]; //状态转移
+//            }
+//        return dp[n];
     }
 
     public static int findPath(int rows, int cols){
