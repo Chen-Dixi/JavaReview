@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="c02e.jpgpj" type="repository">
+    <properties maven-id="org.c02e.jpgpj:jpgpj:1.3" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/c02e/jpgpj/jpgpj/1.3/jpgpj-1.3.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcpg-jdk15on/1.70/bcpg-jdk15on-1.70.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/bouncycastle/bcprov-jdk15on/1.70/bcprov-jdk15on-1.70.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
