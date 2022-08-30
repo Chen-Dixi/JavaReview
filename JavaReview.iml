@@ -14,5 +14,7 @@
     <orderEntry type="library" name="junit.vintage.engine" level="project" />
     <orderEntry type="library" name="io.projectreactor.reactor.test" level="project" />
     <orderEntry type="library" name="springframework.boot.spring.starter.test" level="project" />
+    <orderEntry type="library" name="apache.commons.collections4" level="project" />
+    <orderEntry type="library" name="apache.commons.lang3" level="project" />
   </component>
 </module>
