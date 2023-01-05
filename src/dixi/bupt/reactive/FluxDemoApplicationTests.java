@@ -126,7 +126,7 @@ class FluxDemoApplicationTests {
                         counter++;
                         if (counter % 2 == 0) {
                             System.out.println("Requesting 2 emissions");
-                            s.request(2);
+//                            s.request(2);
                         }
                     }
 
@@ -154,5 +154,11 @@ class FluxDemoApplicationTests {
         StepVerifier.create(mono)
                 .expectNext("anythingValue stored in context: myValue")
                 .verifyComplete();
+    }
+
+    @Test
+    public void contextFluxTest() {
+        String key = "key";
+        
     }
 }

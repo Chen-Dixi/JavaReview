@@ -1,7 +1,7 @@
 package dixi.bupt.thread;
 
 public class ThreadTest implements Runnable{
-
+    private ThreadLocal<Integer> local;
     public static  void main(String[] args){
         new ThreadTest();
     }

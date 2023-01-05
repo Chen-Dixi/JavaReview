@@ -16,5 +16,6 @@
     <orderEntry type="library" name="springframework.boot.spring.starter.test" level="project" />
     <orderEntry type="library" name="apache.commons.collections4" level="project" />
     <orderEntry type="library" name="apache.commons.lang3" level="project" />
+    <orderEntry type="library" name="google.guava" level="project" />
   </component>
 </module>
