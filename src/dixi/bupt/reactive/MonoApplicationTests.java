@@ -1,10 +1,10 @@
 package dixi.bupt.reactive;
 
-import java.sql.Time;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +14,7 @@ import dixi.bupt.reactive.core.DefaultChain;
 import dixi.bupt.reactive.core.DefaultFilter;
 import dixi.bupt.reactive.core.Exchange;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 /**
@@ -156,5 +157,25 @@ public class MonoApplicationTests {
     private Mono<String> getDeferSample() {
         System.out.println("call getDeferSample");
         return Mono.just("test");
+    }
+
+    @Test
+    public void monoTransformTest() {
+        Mono<Integer> monoInteger = Mono.just(4);
+
+        Function<Mono<Integer>, Mono<Integer>> applySchedulers = mono -> mono.subscribeOn(Schedulers.newParallel("Scheduler SB"))
+                .publishOn(Schedulers.newParallel("Scheduler PB"));
+        monoInteger = monoInteger.map(i -> {
+                    System.out.println("First map: " + Thread.currentThread().getName());
+                    return i * i;
+        }).transform(applySchedulers)
+                .map(i -> {
+                    System.out.println("Second map: " + Thread.currentThread().getName());
+                    return i / 2;
+                });
+
+        StepVerifier.create(monoInteger)
+                .expectNext(8)
+                .verifyComplete();
     }
 }
