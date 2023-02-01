@@ -143,6 +143,21 @@ public class MonoApplicationTests {
                 .subscribe();
     }
 
+    /**
+     * <a href="https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#flatMap-java.util.function.Function-">flatMap-官方API文档</a>
+     */
+    @Test
+    public void flatMapTest() {
+        Mono<String> mono = Mono.fromSupplier(() -> Mono.just(3))
+                .flatMap(number -> {
+                   return Mono.just("three");
+                });
+
+        StepVerifier.create(mono)
+                .expectNext("three")
+                .verifyComplete();
+    }
+
     @Test
     public void monoDeferTest() {
         Mono<String> deferAction =  Mono.defer(this::getDeferSample);
@@ -159,6 +174,9 @@ public class MonoApplicationTests {
         return Mono.just("test");
     }
 
+    /**
+     * <a href="https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html#transform-java.util.function.Function-">transform-API文档</a>
+     */
     @Test
     public void monoTransformTest() {
         Mono<Integer> monoInteger = Mono.just(4);
@@ -178,4 +196,20 @@ public class MonoApplicationTests {
                 .expectNext(8)
                 .verifyComplete();
     }
+
+    @Test
+    public void monoThenTest() {
+        Mono<Void> first = Mono.just(1L)
+                .flatMap(integer -> {
+                    System.out.println("First work ...");
+                    Uninterruptibles.sleepUninterruptibly(integer, TimeUnit.SECONDS);
+                    return Mono.empty();
+                }).then(Mono.fromSupplier(() -> {
+                    System.out.println("Second work ...");
+                    return null;
+                }));
+        first.subscribe();
+    }
+
+
 }
