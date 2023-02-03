@@ -104,6 +104,15 @@ class FluxDemoApplicationTests {
 
     @Test
     public void backpressureExample() {
+        /*
+        onSubscribe
+        Requesting 2 emissions
+        doOnNext: 1
+        onNext 1
+        doOnNext: 2
+        onNext 2
+        Requesting 2 emissions
+        */
         Flux.range(1,5)
                 .doOnNext(integer -> {
                     System.out.println("doOnNext: " + integer);
