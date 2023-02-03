@@ -8,17 +8,17 @@ import reactor.core.publisher.Mono;
  * @author chendixi
  * Created on 2023-01-06
  */
-public class DefaultChain {
+public class DefaultChain implements Chain {
 
     private int index;
-    List<DefaultFilter> filters;
+    List<Filter> filters;
 
-    public DefaultChain(List<DefaultFilter> filters) {
+    public DefaultChain(List<Filter> filters) {
         this.index = 0;
         this.filters = filters;
     }
 
-    public DefaultChain(List<DefaultFilter> filters, int index) {
+    public DefaultChain(List<Filter> filters, int index) {
         this.index = index;
         this.filters = filters;
     }
@@ -26,7 +26,7 @@ public class DefaultChain {
     public Mono<Void> filter(Exchange exchange) {
         return Mono.defer(() -> {
             if (index < filters.size()) {
-                DefaultFilter filter = filters.get(index);
+                Filter filter = filters.get(index);
                 DefaultChain chain = new DefaultChain(filters, index + 1);
                 return filter.filter(exchange, chain);
             } else {

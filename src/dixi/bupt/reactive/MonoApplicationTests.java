@@ -15,6 +15,7 @@ import com.google.common.util.concurrent.Uninterruptibles;
 import dixi.bupt.reactive.core.DefaultChain;
 import dixi.bupt.reactive.core.DefaultFilter;
 import dixi.bupt.reactive.core.Exchange;
+import dixi.bupt.reactive.core.Filter;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
@@ -25,6 +26,9 @@ import reactor.test.StepVerifier;
  */
 
 public class MonoApplicationTests {
+    private static String PRE_FILTER_FORMAT = "%s pre filter";
+    private static String POST_FILTER_FORMAT = "%s post filter";
+
     @Test
     public void onErrorResumeTest() {
         Mono<String> mono1 = Mono.defer(() -> Mono.just("asdasdas"));
@@ -84,7 +88,7 @@ public class MonoApplicationTests {
             }
         };
 
-        List<DefaultFilter> filters = new ArrayList<>();
+        List<Filter> filters = new ArrayList<>();
         filters.add(filterOne);
         filters.add(filterTwo);
         filters.add(filterThree);
@@ -131,7 +135,7 @@ public class MonoApplicationTests {
             }
         };
 
-        List<DefaultFilter> filters = new ArrayList<>();
+        List<Filter> filters = new ArrayList<>();
         filters.add(authCheck);
         filters.add(filterTwo);
 
@@ -164,10 +168,15 @@ public class MonoApplicationTests {
     @Test
     public void monoDeferTest() {
         Mono<String> deferAction =  Mono.defer(this::getDeferSample);
+        Mono<String> callableAction =  Mono.fromCallable(() -> getCallableSample());
 
         System.out.println("Intermediate");
 
         StepVerifier.create(deferAction)
+                .expectNext("test")
+                .verifyComplete();
+
+        StepVerifier.create(callableAction)
                 .expectNext("test")
                 .verifyComplete();
     }
@@ -175,6 +184,11 @@ public class MonoApplicationTests {
     private Mono<String> getDeferSample() {
         System.out.println("call getDeferSample");
         return Mono.just("test");
+    }
+
+    private String getCallableSample() {
+        System.out.println("call getCallableSample");
+        return "test";
     }
 
     /**
@@ -324,7 +338,7 @@ public class MonoApplicationTests {
             }
         };
 
-        List<DefaultFilter> filters = new ArrayList<>();
+        List<Filter> filters = new ArrayList<>();
         filters.add(filterOne);
         filters.add(filterTwo);
         filters.add(filterThree);
@@ -367,7 +381,7 @@ public class MonoApplicationTests {
             }
         };
 
-        List<DefaultFilter> filters = new ArrayList<>();
+        List<Filter> filters = new ArrayList<>();
         filters.add(filterOne);
         filters.add(filterTwo);
 
@@ -411,7 +425,7 @@ public class MonoApplicationTests {
             }
         };
 
-        List<DefaultFilter> filters = new ArrayList<>();
+        List<Filter> filters = new ArrayList<>();
         filters.add(filterOne);
         filters.add(filterTwo);
 
@@ -456,7 +470,7 @@ public class MonoApplicationTests {
             }
         };
 
-        List<DefaultFilter> filters = new ArrayList<>();
+        List<Filter> filters = new ArrayList<>();
         filters.add(filterOne);
         filters.add(filterTwo);
 
@@ -484,5 +498,27 @@ public class MonoApplicationTests {
 
                     }
                 });
+    }
+
+    @Test
+    public void monoRunnableTest() {
+        List<Filter> filters = new ArrayList<>();
+
+        filters.add(createFilter("one"));
+        filters.add(createFilter("two"));
+        filters.add(createFilter("three"));
+
+        DefaultChain chain = new DefaultChain(filters);
+        Exchange exchange = new Exchange();
+        chain.filter(exchange).subscribe();
+    }
+
+    private Filter createFilter(String name) {
+        return (exchange, chain) -> {
+            System.out.println(String.format(PRE_FILTER_FORMAT, name));
+            return chain.filter(exchange).then(Mono.fromRunnable(() -> {
+                System.out.println(String.format(POST_FILTER_FORMAT, name));
+            }));
+        };
     }
 }
