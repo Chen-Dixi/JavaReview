@@ -235,28 +235,64 @@ public class MonoApplicationTests {
     /**
      * In other words ignore element from this Mono and transform its completion signal into the emission and completion signal of a provided Mono<V>. <br/>
      * Error signal is replayed in the resulting Mono<V>.
+     * <p/>
+     * First Test ...<br/>
+     * Mono one ...<br/>
+     * Mono one on error<br/>
+     * Downstream on Error error<br/>
+     * Second Test ...<br/>
+     * Mono one ...<br/>
+     * Then: Mono two ...<br/>
+     * Then: Mono two on error<br/>
+     * Downstream on error<br/>
      */
     @Test
     public void monoThenErrorTest() {
+        System.out.println("First Test ...");
         Mono<Long> errorSignalThen = Mono.just(1L)
                 .map(l -> {
-                    System.out.println("First work ...");
-                    return mapLongOk(l);
+                    System.out.println("Mono one ...");
+                    return mapLongWithError(l);
                 })
                 .doOnError(e -> {
-                    System.out.println("First work error");
+                    System.out.println("Mono one on error");
                 })
                 .then(Mono.just(1L)
                         .map(l -> {
-                            System.out.println("Second work ...");
+                            System.out.println("Then: Mono two ...");
                             return mapLongWithError(l);
                         })
                         .doOnError(e -> {
-                            System.out.println("Second work error");
+                            System.out.println("Then: Mono two on error");
                         })
-                );
-
+                ).doOnError(e -> {
+                    System.out.println("Downstream on error");
+                });
         errorSignalThen.subscribe();
+
+        System.out.println("Second Test ...");
+
+        Mono<Long> errorSignalThen2 = Mono.just(1L)
+                .map(l -> {
+                    System.out.println("Mono one ...");
+                    return mapLongOk(l);
+                })
+                .doOnError(e -> {
+                    System.out.println("Mono one on error");
+                })
+                .then(Mono.just(1L)
+                        .map(l -> {
+                            System.out.println("Then: Mono two ...");
+                            return mapLongWithError(l);
+                        })
+                        .doOnError(e -> {
+                            System.out.println("Then: Mono two on error");
+                        })
+                ).doOnError(e -> {
+                    System.out.println("Downstream on Error error");
+                });
+
+        errorSignalThen2.subscribe();
     }
 
     private long mapLongWithError(long l) {
