@@ -557,4 +557,34 @@ public class MonoApplicationTests {
             }));
         };
     }
+
+    /**
+     * 如果doOnNext里面有Mono, Mono里的内容是不会执行的
+     */
+    @Test
+    public void monoDoOnNextTest() {
+        List<Filter> filters = new ArrayList<>();
+        filters.add((exchange, chain) -> {
+            return Mono.just(1)
+                    .doOnNext(integer -> handle(integer))
+                    .flatMap(integer -> chain.filter(exchange));
+        });
+
+        DefaultChain chain = new DefaultChain(filters);
+        Exchange exchange = new Exchange();
+        chain.filter(exchange).subscribe();
+
+    }
+
+    private void handle(Integer integer) {
+        System.out.println("call handle");
+        getMonoVoid();
+    }
+
+    private Mono<Void> getMonoVoid() {
+        System.out.println("call getMonoVoid");
+        return Mono.fromRunnable(()-> {
+            System.out.println("call getMonoVoid: void Mono");
+        });
+    }
 }
