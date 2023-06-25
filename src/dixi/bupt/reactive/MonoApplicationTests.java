@@ -537,6 +537,39 @@ public class MonoApplicationTests {
     }
 
     @Test
+    public void doOnCancelAndErrorTest() {
+        Filter filterOne = (exchange, chain) -> {
+                return Mono.defer(() -> {
+                    System.out.println("one");
+                    return Mono.empty();
+                }).doOnCancel(() -> System.out.println("filter one onCancel pre"))
+                        .doOnError((e) -> System.out.println("filter one onError pre"))
+                        .then(chain.filter(exchange))
+                        .doOnError((e) -> System.out.println("filter one onError post"))
+                        .doOnCancel(() -> System.out.println("filter one onCancel post"));
+            };
+
+
+
+        Filter filterTwo = (exchange, chain) -> {
+                return Mono.defer(() -> {
+                    mapLongWithError(1L);
+                    return chain.filter(exchange).doOnSuccess((t) -> {
+                        System.out.println("Filter two cancel");
+                    });
+                });
+            };
+
+
+        List<Filter> filters = new ArrayList<>();
+        filters.add(filterOne);
+        filters.add(filterTwo);
+
+        DefaultChain chain = new DefaultChain(filters);
+        Exchange exchange = new Exchange();
+        chain.filter(exchange).subscribe();
+    }
+    @Test
     public void monoRunnableTest() {
         List<Filter> filters = new ArrayList<>();
 

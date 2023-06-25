@@ -27,8 +27,8 @@ public class DefaultChain implements Chain {
         return Mono.defer(() -> {
             if (index < filters.size()) {
                 Filter filter = filters.get(index);
-                DefaultChain chain = new DefaultChain(filters, index + 1);
-                return filter.filter(exchange, chain);
+                index++;
+                return filter.filter(exchange, this);
             } else {
                 return Mono.empty();
             }

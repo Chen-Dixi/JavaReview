@@ -3,6 +3,8 @@ package dixi.bupt.javaContainer;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.junit.Test;
+
 public class LearnArrayList {
     private Vector<Integer> vector = new Vector<>();
     private LinkedList<Integer> list = new LinkedList<>();
@@ -32,6 +34,28 @@ public class LearnArrayList {
             if ("male".equals(student.getGender())) {
                 iterator.remove();//使用迭代器的删除方法删除
             }
+        }
+    }
+
+    @Test
+    public void testListIterator() {
+        List<Long> arr = new ArrayList<>(4);
+        arr.add(1L);
+        arr.add(3L);
+        arr.add(4L);
+
+        ListIterator<Long> itr = arr.listIterator();
+
+        Long next = itr.next();
+        System.out.println("next: " + next);
+        Long prev = itr.previous();
+        System.out.println("prev: " + prev);
+
+        itr.add(2L);
+        next = itr.next();
+        System.out.println("next: " + next);
+        for (Long i : arr) {
+            System.out.println(i);
         }
     }
 }
