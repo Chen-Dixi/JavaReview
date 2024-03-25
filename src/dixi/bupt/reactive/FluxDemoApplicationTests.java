@@ -1,6 +1,6 @@
 package dixi.bupt.reactive;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 

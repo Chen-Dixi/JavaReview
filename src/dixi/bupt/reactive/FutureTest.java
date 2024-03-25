@@ -3,7 +3,7 @@ package dixi.bupt.reactive;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  * Created on 2022-08-11

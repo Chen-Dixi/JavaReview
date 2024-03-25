@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 

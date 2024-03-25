@@ -29,7 +29,7 @@ CyclicBarrier 有两个构造函数，其中 parties 指示计数器的初始值
         final int totalThread = 10;
         CyclicBarrier cyclicBarrier = new CyclicBarrier(totalThread);
         ExecutorService executorService = Executors.newCachedThreadPool();
-        for(int i=0; i < totalThread; i++){
+        for(int i = 0; i < totalThread; i++){
             executorService.execute(() -> {
                 System.out.print("before");
                 try{
