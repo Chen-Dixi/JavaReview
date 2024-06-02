@@ -11,7 +11,7 @@ import org.junit.Test;
 public class FutureTest {
     @Test
     public void backpressureExample() {
-        String var_in_main_thread = "asd";
+        String varInMainThread = "asd";
         CompletableFuture<Void> f = CompletableFuture.runAsync(() -> {
             System.out.println("run async");
             System.out.println(Thread.currentThread().getName());
@@ -24,7 +24,7 @@ public class FutureTest {
         System.out.println("main thread");
         System.out.println(Thread.currentThread().getName());
         f.whenComplete((v, e) -> {
-            System.out.println("run async complete " + var_in_main_thread);
+            System.out.println("run async complete " + varInMainThread);
             System.out.println(Thread.currentThread().getName());
         });
 

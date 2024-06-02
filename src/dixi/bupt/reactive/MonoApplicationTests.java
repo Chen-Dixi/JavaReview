@@ -30,6 +30,34 @@ public class MonoApplicationTests {
     private static String POST_FILTER_FORMAT = "%s post filter";
 
     @Test
+    public void monoToFluxTest() {
+        Mono<String> mono = Mono.defer(() -> Mono.just("asdasdas"));
+        mono.subscribe();
+    }
+
+    // onErrorResume, flatMap, timeout 放在一起测试
+    @Test
+    public void baseStreamTest() {
+        Mono<Void> voidMono = Mono.defer(() -> {
+                    System.out.println("start");
+                    return Mono.just("3");
+                })
+                .flatMap(str -> {
+                    System.out.println("receive str " + str);
+                    if (str == "3") {
+                        return voidMono();
+                    }
+                    return Mono.just("4");
+                })
+                .flatMap(number -> {
+                    System.out.println("receive number " + number);
+                    return Mono.empty();
+                });
+
+        voidMono.subscribe();
+    }
+
+    @Test
     public void onErrorResumeTest() {
         Mono<String> mono1 = Mono.defer(() -> Mono.just("asdasdas"));
         Mono<String> mono2 = Mono.defer(() -> Mono.just("1"));
@@ -106,13 +134,13 @@ public class MonoApplicationTests {
         DefaultFilter authCheck = new DefaultFilter() {
             @Override
             public Mono<Void> filter(Exchange exchange, DefaultChain chain) {
-                return Mono.defer(()->
-                    Mono.fromCallable(() -> {
-                        System.out.println("First filter: " + Thread.currentThread().getName());
-                        Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
-                        return true;
-                    })
-                ).timeout(Duration.ofMillis(500), Mono.defer(() ->  Mono.error(new Exception("validate passport token timeout"))))
+                return Mono.defer(() ->
+                                Mono.fromCallable(() -> {
+                                    System.out.println("First filter: " + Thread.currentThread().getName());
+                                    Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+                                    return true;
+                                })
+                        ).timeout(Duration.ofMillis(500), Mono.defer(() -> Mono.error(new Exception("validate passport token timeout"))))
                         .onErrorResume(e -> {
                             System.out.println(e.getMessage());
                             System.out.println("stop at filter authCheck, ");
@@ -152,7 +180,7 @@ public class MonoApplicationTests {
     public void flatMapTest() {
         Mono<String> mono = Mono.fromSupplier(() -> Mono.just(3))
                 .flatMap(number -> {
-                   return Mono.just("three");
+                    return Mono.just("three");
                 });
 
         StepVerifier.create(mono)
@@ -167,8 +195,8 @@ public class MonoApplicationTests {
      */
     @Test
     public void monoDeferTest() {
-        Mono<String> deferAction =  Mono.defer(this::getDeferSample);
-        Mono<String> callableAction =  Mono.fromCallable(() -> getCallableSample());
+        Mono<String> deferAction = Mono.defer(this::getDeferSample);
+        Mono<String> callableAction = Mono.fromCallable(() -> getCallableSample());
 
         System.out.println("Intermediate");
 
@@ -198,12 +226,13 @@ public class MonoApplicationTests {
     public void monoTransformTest() {
         Mono<Integer> monoInteger = Mono.just(4);
 
-        Function<Mono<Integer>, Mono<Integer>> applySchedulers = mono -> mono.subscribeOn(Schedulers.newParallel("Scheduler SB"))
-                .publishOn(Schedulers.newParallel("Scheduler PB"));
+        Function<Mono<Integer>, Mono<Integer>> applySchedulers = mono -> mono.publishOn(Schedulers.newParallel("Scheduler PB"))
+                .subscribeOn(Schedulers.newParallel("Scheduler SB"));
+
         monoInteger = monoInteger.map(i -> {
                     System.out.println("First map: " + Thread.currentThread().getName());
                     return i * i;
-        }).transform(applySchedulers)
+                }).transform(applySchedulers)
                 .map(i -> {
                     System.out.println("Second map: " + Thread.currentThread().getName());
                     return i / 2;
@@ -321,18 +350,18 @@ public class MonoApplicationTests {
             @Override
             public Mono<Void> filter(Exchange exchange, DefaultChain chain) {
                 return Mono.fromSupplier(() -> {
-                    System.out.println("one");
-                    return 1L;
-                }).map((i) -> mapLongOk(i))
-                .doOnError(e -> {
-                    System.out.println("Filter one pre onError");
-                })
-                .flatMap((i) -> {
-                    System.out.println("Filter one flatMap");
-                    return chain.filter(exchange).doOnError(e -> {
-                        System.out.println("Filter one post onError");
-                    });
-                });
+                            System.out.println("one");
+                            return 1L;
+                        }).map((i) -> mapLongOk(i))
+                        .doOnError(e -> {
+                            System.out.println("Filter one pre onError");
+                        })
+                        .flatMap((i) -> {
+                            System.out.println("Filter one flatMap");
+                            return chain.filter(exchange).doOnError(e -> {
+                                System.out.println("Filter one post onError");
+                            });
+                        });
             }
         };
 
@@ -341,18 +370,18 @@ public class MonoApplicationTests {
             @Override
             public Mono<Void> filter(Exchange exchange, DefaultChain chain) {
                 return Mono.fromSupplier(() -> {
-                    System.out.println("two");
-                    return 1L;
-                }).map((i) -> mapLongOk(i))
-                .doOnError(e -> {
-                    System.out.println("Filter two pre onError");
-                })
-                .flatMap((i) -> {
-                    System.out.println("Filter two flatMap");
-                    return chain.filter(exchange).doOnError(e -> {
-                        System.out.println("Filter two post onError");
-                    });
-                });
+                            System.out.println("two");
+                            return 1L;
+                        }).map((i) -> mapLongOk(i))
+                        .doOnError(e -> {
+                            System.out.println("Filter two pre onError");
+                        })
+                        .flatMap((i) -> {
+                            System.out.println("Filter two flatMap");
+                            return chain.filter(exchange).doOnError(e -> {
+                                System.out.println("Filter two post onError");
+                            });
+                        });
             }
         };
 
@@ -517,11 +546,11 @@ public class MonoApplicationTests {
                     @Override
                     public void onSubscribe(Subscription subscription) {
                         subscription.cancel();
+                        System.out.println("onSubscribe");
                     }
 
                     @Override
                     public void onNext(Void v) {
-
                     }
 
                     @Override
@@ -531,7 +560,7 @@ public class MonoApplicationTests {
 
                     @Override
                     public void onComplete() {
-
+                        System.out.println("onComplete");
                     }
                 });
     }
@@ -539,26 +568,25 @@ public class MonoApplicationTests {
     @Test
     public void doOnCancelAndErrorTest() {
         Filter filterOne = (exchange, chain) -> {
-                return Mono.defer(() -> {
-                    System.out.println("one");
-                    return Mono.empty();
-                }).doOnCancel(() -> System.out.println("filter one onCancel pre"))
-                        .doOnError((e) -> System.out.println("filter one onError pre"))
-                        .then(chain.filter(exchange))
-                        .doOnError((e) -> System.out.println("filter one onError post"))
-                        .doOnCancel(() -> System.out.println("filter one onCancel post"));
-            };
-
+            return Mono.defer(() -> {
+                        System.out.println("one");
+                        return Mono.empty();
+                    }).doOnCancel(() -> System.out.println("filter one onCancel pre"))
+                    .doOnError((e) -> System.out.println("filter one onError pre"))
+                    .then(chain.filter(exchange))
+                    .doOnError((e) -> System.out.println("filter one onError post"))
+                    .doOnCancel(() -> System.out.println("filter one onCancel post"));
+        };
 
 
         Filter filterTwo = (exchange, chain) -> {
-                return Mono.defer(() -> {
-                    mapLongWithError(1L);
-                    return chain.filter(exchange).doOnSuccess((t) -> {
-                        System.out.println("Filter two cancel");
-                    });
+            return Mono.defer(() -> {
+                mapLongWithError(1L);
+                return chain.filter(exchange).doOnSuccess((t) -> {
+                    System.out.println("Filter two cancel");
                 });
-            };
+            });
+        };
 
 
         List<Filter> filters = new ArrayList<>();
@@ -569,6 +597,7 @@ public class MonoApplicationTests {
         Exchange exchange = new Exchange();
         chain.filter(exchange).subscribe();
     }
+
     @Test
     public void monoRunnableTest() {
         List<Filter> filters = new ArrayList<>();
@@ -614,10 +643,68 @@ public class MonoApplicationTests {
         getMonoVoid();
     }
 
+    /**
+     * 当上游步骤返回了Mono<Void>的时候，下游至少需要一个对象结果的operator就不会执行
+     * 可以看这篇文档：<a href="https://projectreactor.io/docs/core/release/reference/#faq.monoThen">My Mono zipWith or zipWhen is never called</a>
+     */
+    @Test
+    public void emptySourceTest() {
+        List<Filter> filters = new ArrayList<>();
+        boolean testVoidBehavior = true; // 尝试ture 和 false，分别是什么运行结果
+        filters.add((exchange, chain) -> {
+            return Mono.defer(() -> {
+                        if (testVoidBehavior) {
+                            return getMonoVoid();
+                        }
+                        return Mono.just(true);
+                    })
+                    .flatMap(result -> {
+                        // 当上面返回返回 Void 的时候，flatMap不会执行。
+                        System.out.println("filter1 flatMap");
+                        return chain.filter(exchange);
+                    });
+        });
+        filters.add((exchange, chain) -> {
+            System.out.println("filter2 start");
+            return chain.filter(exchange);
+        });
+
+        DefaultChain chain = new DefaultChain(filters);
+        Exchange exchange = new Exchange();
+        chain.filter(exchange).subscribe();
+    }
+
+    @Test
+    public void emptySourceWithSwitchIfEmpty() {
+        List<Filter> filters = new ArrayList<>();
+        filters.add((exchange, chain) -> {
+            return Mono.defer(() -> {
+                return getMonoVoid();
+            })
+                    .switchIfEmpty(
+                            Mono.defer(() -> {
+                                return chain.filter(exchange);
+                            })
+                    );
+        });
+
+        filters.add((exchange, chain) -> {
+            System.out.println("filter2 start");
+            return chain.filter(exchange);
+        });
+        DefaultChain chain = new DefaultChain(filters);
+        Exchange exchange = new Exchange();
+        chain.filter(exchange).subscribe();
+    }
+
     private Mono<Void> getMonoVoid() {
         System.out.println("call getMonoVoid");
-        return Mono.fromRunnable(()-> {
+        return Mono.fromRunnable(() -> {
             System.out.println("call getMonoVoid: void Mono");
         });
+    }
+
+    private Mono<Void> voidMono() {
+        return Mono.empty();
     }
 }
