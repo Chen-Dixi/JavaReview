@@ -31,13 +31,20 @@ public class MonoApplicationTests {
 
     @Test
     public void monoToFluxTest() {
-        Mono<String> mono = Mono.defer(() -> Mono.just("asdasdas"));
+        System.out.println("Start on: " + Thread.currentThread().getName());
+        Mono<String> mono = Mono.defer(() -> {
+            System.out.println("Defer on: " + Thread.currentThread().getName());
+            return Mono.just("asdasdas");
+        }).doOnNext(str -> {
+            System.out.println("doOnNext on: " + Thread.currentThread().getName());
+        });
         mono.subscribe();
     }
 
     // onErrorResume, flatMap, timeout 放在一起测试
     @Test
     public void baseStreamTest() {
+
         Mono<Void> voidMono = Mono.defer(() -> {
                     System.out.println("start");
                     return Mono.just("3");
@@ -65,13 +72,38 @@ public class MonoApplicationTests {
         Mono<Long> longMono = mono1.flatMap(s -> {
             return Mono.just(Long.valueOf(s));
         }).onErrorResume(throwable -> {
-            System.out.println("on error resume");
-            return Mono.just(0L);
+            System.out.println("on error resume1");
+            return Mono.error(throwable);
+        }).flatMap(longValue -> {
+            System.out.println("long value" + longValue);
+            return Mono.just(longValue);
+        }).onErrorResume(throwable -> {
+            System.out.println("on error resume2");
+            return Mono.error(throwable);
         });
 
-        StepVerifier.create(longMono)
-                .expectNext(0L)
-                .verifyComplete();
+        longMono.subscribe(new Subscriber<Long>() {
+            @Override
+            public void onSubscribe(Subscription subscription) {
+//                        subscription.cancel();
+                System.out.println("Subscriber.onSubscribe");
+            }
+
+            @Override
+            public void onNext(Long v) {
+                System.out.println("Subscriber.onNext"); // 没有打印出来
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                System.out.println("Subscriber.onError");
+            }
+
+            @Override
+            public void onComplete() {
+                System.out.println("onComplete");
+            }
+        });
 
         longMono = mono2.flatMap(s -> {
             return Mono.just(Long.valueOf(s));
@@ -321,7 +353,28 @@ public class MonoApplicationTests {
                     System.out.println("Downstream on Error error");
                 });
 
-        errorSignalThen2.subscribe();
+        errorSignalThen2.subscribe(new Subscriber<Long>() {
+            @Override
+            public void onSubscribe(Subscription subscription) {
+//                        subscription.cancel();
+                System.out.println("Subscriber.onSubscribe");
+            }
+
+            @Override
+            public void onNext(Long v) {
+                System.out.println("Subscriber.onNext"); // 没有打印出来
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                System.out.println("Subscriber.onError");
+            }
+
+            @Override
+            public void onComplete() {
+                System.out.println("onComplete");
+            }
+        });
     }
 
     private long mapLongWithError(long l) {
@@ -513,12 +566,15 @@ public class MonoApplicationTests {
         DefaultFilter filterOne = new DefaultFilter() {
             @Override
             public Mono<Void> filter(Exchange exchange, DefaultChain chain) {
-                return Mono.defer(() -> {
-                    System.out.println("one");
-                    return chain.filter(exchange).doOnCancel(() -> {
-                        System.out.println("Filter one cancel");
-                    });
-                });
+                System.out.println("one");
+                return Mono.fromSupplier(() -> {
+                    System.out.println("Filter one from supplier");
+                    return 3;
+                }).flatMap(n -> chain.filter(exchange).doOnSuccess((t) -> {
+                    System.out.println("Filter one doOnSuccess");
+                }).doOnCancel(() -> {
+                    System.out.println("Filter one doOnCancel");
+                }));
             }
         };
 
@@ -526,12 +582,13 @@ public class MonoApplicationTests {
         DefaultFilter filterTwo = new DefaultFilter() {
             @Override
             public Mono<Void> filter(Exchange exchange, DefaultChain chain) {
-                return Mono.defer(() -> {
-                    System.out.println("two");
-                    return chain.filter(exchange).doOnSuccess((t) -> {
-                        System.out.println("Filter two cancel");
-                    });
-                });
+                System.out.println("two");
+                return Mono.fromSupplier(() -> {
+                    System.out.println("Filter two from supplier");
+                    return 3;
+                }).flatMap(n -> chain.filter(exchange).doOnSuccess((t) -> {
+                    System.out.println("Filter two doOnSuccess");
+                }));
             }
         };
 
@@ -545,12 +602,13 @@ public class MonoApplicationTests {
                 .subscribe(new Subscriber<Void>() {
                     @Override
                     public void onSubscribe(Subscription subscription) {
-                        subscription.cancel();
-                        System.out.println("onSubscribe");
+//                        subscription.cancel();
+                        System.out.println("Subscriber.onSubscribe");
                     }
 
                     @Override
                     public void onNext(Void v) {
+                        System.out.println("Subscriber.onNext"); // 没有打印出来
                     }
 
                     @Override
@@ -639,7 +697,7 @@ public class MonoApplicationTests {
     }
 
     private void handle(Integer integer) {
-        System.out.println("call handle");
+        System.out.println("call handle " + integer);
         getMonoVoid();
     }
 
@@ -679,8 +737,8 @@ public class MonoApplicationTests {
         List<Filter> filters = new ArrayList<>();
         filters.add((exchange, chain) -> {
             return Mono.defer(() -> {
-                return getMonoVoid();
-            })
+                        return getMonoVoid();
+                    })
                     .switchIfEmpty(
                             Mono.defer(() -> {
                                 return chain.filter(exchange);
@@ -695,6 +753,56 @@ public class MonoApplicationTests {
         DefaultChain chain = new DefaultChain(filters);
         Exchange exchange = new Exchange();
         chain.filter(exchange).subscribe();
+    }
+
+    @Test
+    public void zipMonoTest() {
+        List<Filter> filters = new ArrayList<>();
+        filters.add((exchange, chain) -> {
+            // zip
+            Mono<Boolean> checkPermission1 = Mono.fromSupplier(() -> true);
+            Mono<Boolean> checkPermission2 = Mono.fromSupplier(() -> false);
+            Mono<Boolean> zipMono = Mono.zip(checkPermission1, checkPermission2, (v1, v2) -> {
+                System.out.println("result 2: " + v1);
+                System.out.println("result 2: " + v2);
+                return v1 || v2;
+            });
+
+
+            return zipMono.flatMap(result -> {
+                System.out.println("final result: " + result);
+                return chain.filter(exchange);
+            });
+        });
+
+        DefaultChain chain = new DefaultChain(filters);
+        Exchange exchange = new Exchange();
+        chain.filter(exchange).subscribe();
+    }
+
+    @Test
+    public void monoSinkTest() {
+        Mono<String> mono = Mono.create(sink -> {
+            simulateAsyncOperation(() -> {
+                sink.success("Hello, World!");
+            }, () -> {
+                sink.error(new RuntimeException("Async operation failed"));
+            });
+        });
+
+        mono.subscribe(
+                result -> System.out.println("Success: " + result),
+                error -> System.out.println("Error: " + error.getMessage())
+        );
+    }
+
+    private static void simulateAsyncOperation(Runnable successAction, Runnable failureAction) {
+        try {
+            Thread.sleep(1000);
+            successAction.run();
+        } catch (InterruptedException e) {
+            failureAction.run();
+        }
     }
 
     private Mono<Void> getMonoVoid() {
