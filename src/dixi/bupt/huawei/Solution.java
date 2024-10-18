@@ -1,29 +1,28 @@
 package dixi.bupt.huawei;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Solution {
 
-    public static void main(String[] args){
-        String s= "  i am  verry  happy ";
+    public static void main(String[] args) {
+        String s = "  i am  verry  happy ";
         String ans = reverseString(s);
         System.out.println(ans);
     }
 
-    public static String reverseString(String str){
+    public static String reverseString(String str) {
         String[] res = str.split(" ");
 
         List<String> resList = new ArrayList<>();
-        for(String s :res){
-            if(!"".equals(s)){
+        for (String s : res) {
+            if (!"".equals(s)) {
                 resList.add(s);
             }
         }
         // 已提取单词
         StringBuilder sb = new StringBuilder();
-        for(int i=resList.size()-1; i>0;i--){
+        for (int i = resList.size() - 1; i > 0; i--) {
             String word = resList.get(i);
             sb.append(word);
             sb.append(" ");

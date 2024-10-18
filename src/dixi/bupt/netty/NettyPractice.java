@@ -1,7 +1,6 @@
 package dixi.bupt.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.AbstractServerChannel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;

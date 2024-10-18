@@ -31,12 +31,14 @@
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
-            <version>3.4.15</version>
+            <version>3.2.11.RELEASE</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
-            <version>3.4.14</version>
+            <version>3.2.11.RELEASE</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -52,6 +54,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <version>18.0</version>
         </dependency>
 
         <!-- junit单元测试依赖[scope:test] -->

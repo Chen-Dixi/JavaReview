@@ -1,6 +1,7 @@
 package dixi.bupt.thread;
 
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -32,6 +33,7 @@ public class FutureTest {
         CountDownLatch latch = new CountDownLatch(1);
         ListenableFuture<String> listenableFuture = createListenableFuture(latch);
         Mono<String> mono = Mono.create(sink -> {
+            System.out.println("Mono create, current thread: " + Thread.currentThread().getName());
             listenableFuture.addListener(() -> {
                 if (listenableFuture.isDone()) {
                     try {
@@ -43,7 +45,12 @@ public class FutureTest {
             }, Runnable::run);
         });
 
-        mono.subscribe(
+        mono.publishOn(Schedulers.newParallel("Scheduler PB"))
+                .doOnNext(t -> {
+                    System.out.println("Do on next, current thread:" + Thread.currentThread().getName());
+                })
+                .subscribeOn(Schedulers.newParallel("Scheduler SB"))
+                .subscribe(
                 result -> System.out.println("Success: " + result),
                 error -> System.out.println("Error: " + error.getMessage())
         );
