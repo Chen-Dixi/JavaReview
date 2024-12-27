@@ -28,6 +28,10 @@ public class FutureTest {
         System.out.println("Hello World!");
     }
 
+    /**
+     * 结论。subscribeOn 会让第一步Mono.create的步骤运行在 Scheduler SB线程
+     * 如果没有subscribeOn，Mono.create将运行在主线程main
+     */
     @Test
     public void listenableFutureAndMonoTest() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
@@ -37,6 +41,7 @@ public class FutureTest {
             listenableFuture.addListener(() -> {
                 if (listenableFuture.isDone()) {
                     try {
+                        System.out.println("Future done, current thread: " + Thread.currentThread().getName());
                         sink.success(listenableFuture.get());
                     } catch (Exception e) {
                         sink.error(e);

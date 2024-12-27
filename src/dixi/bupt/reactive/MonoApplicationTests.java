@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import org.junit.Test;
@@ -169,7 +170,7 @@ public class MonoApplicationTests {
                 return Mono.defer(() ->
                                 Mono.fromCallable(() -> {
                                     System.out.println("First filter: " + Thread.currentThread().getName());
-                                    Uninterruptibles.sleepUninterruptibly(300, TimeUnit.MILLISECONDS);
+                                    Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);
                                     return true;
                                 })
                         ).timeout(Duration.ofMillis(500), Mono.defer(() -> Mono.error(new Exception("validate passport token timeout"))))
@@ -202,6 +203,33 @@ public class MonoApplicationTests {
         DefaultChain chain = new DefaultChain(filters);
         Exchange exchange = new Exchange();
         chain.filter(exchange)
+                .subscribe();
+    }
+
+    @Test
+    public void monoRunningThreadWhenErrorTest() {
+        Mono.defer(() ->
+                        Mono.fromCallable(() -> {
+                            System.out.println("First: " + Thread.currentThread().getName());
+                            Uninterruptibles.sleepUninterruptibly(1000, TimeUnit.MILLISECONDS);
+                            return true;
+                        })
+                ).timeout(Duration.ofMillis(500), Mono.defer(() -> Mono.error(new TimeoutException("validate passport token timeout"))))
+                .transform(m -> m.flatMap(
+                        x -> {
+                            System.out.println("Transform: " + Thread.currentThread().getName());
+                            return Mono.just(x).publishOn(Schedulers.newParallel("Schedulers PB"));
+                        }
+                ))
+                .onErrorResume(e -> {
+                    System.out.println(e.getMessage());
+                    System.out.println("OnErrorResume: " + Thread.currentThread().getName());
+                    return Mono.just(true);
+                })
+                .map(valid -> {
+                    System.out.println("Map: " + Thread.currentThread().getName());
+                    return valid;
+                })
                 .subscribe();
     }
 
@@ -274,6 +302,7 @@ public class MonoApplicationTests {
                 .expectNext(8)
                 .verifyComplete();
     }
+
 
     /**
      * In other words ignore element from this Mono and transform its completion signal into the emission and completion signal of a provided Mono<V>. <br/>
@@ -795,6 +824,8 @@ public class MonoApplicationTests {
                 error -> System.out.println("Error: " + error.getMessage())
         );
     }
+
+
 
     private static void simulateAsyncOperation(Runnable successAction, Runnable failureAction) {
         try {
