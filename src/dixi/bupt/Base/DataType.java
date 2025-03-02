@@ -1,5 +1,10 @@
 package dixi.bupt.Base;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.junit.Test;
+
 public class DataType {
     // byte 8
     // char 16
@@ -64,8 +69,15 @@ public class DataType {
         StringBuilder sb = new StringBuilder();
         StringBuffer sbf = new StringBuffer();
     }
+    @Test
+    public void checkClassName() {
+        System.out.println(String.class.getName()); // java.lang.String
+        System.out.println(Integer.class.getName()); // java.lang.Integer
+        System.out.println(ArrayList.class.getName()); // java.util.ArrayList
+        System.out.println(HashMap.class.getName()); // java.util.HashMap
 
-    private static void String_Pool_Test(){
-
+        System.out.println(int.class.getName()); // int
+        System.out.println(float.class.getName()); // float
+        System.out.println(byte.class.getName()); // byte
     }
 }

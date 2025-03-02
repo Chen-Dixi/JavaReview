@@ -3,9 +3,7 @@ package dixi.bupt.hash;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Created on 2022-08-29
- */
+
 public class Main {
     public static void main(String[] args) {
         // Mess
@@ -18,7 +16,7 @@ public class Main {
 
             System.out.println(byteArrayToHexString(res));
         } catch (NoSuchAlgorithmException e) {
-
+            System.out.println("error");
         }
 
     }

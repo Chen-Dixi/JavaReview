@@ -56,6 +56,11 @@
             <artifactId>guava</artifactId>
             <version>18.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.phantomthief</groupId>
+            <artifactId>more-lambdas</artifactId>
+            <version>0.1.55</version>
+        </dependency>
 
         <!-- junit单元测试依赖[scope:test] -->
         <dependency>

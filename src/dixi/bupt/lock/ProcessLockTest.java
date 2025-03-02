@@ -1,6 +1,6 @@
 package dixi.bupt.lock;
 
-public class LockTest implements Runnable {
+public class ProcessLockTest implements Runnable {
     private static int i = 0;
 
     private synchronized void add(){
@@ -15,8 +15,8 @@ public class LockTest implements Runnable {
     }
 
     public static void main(String[] args) throws InterruptedException{
-        Thread thread1 = new Thread(new LockTest());
-        Thread thread2 = new Thread(new LockTest());
+        Thread thread1 = new Thread(new ProcessLockTest());
+        Thread thread2 = new Thread(new ProcessLockTest());
 
         thread1.run();
         thread2.run();
