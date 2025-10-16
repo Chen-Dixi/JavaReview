@@ -1,5 +1,7 @@
 package dixi.bupt.Base;
 
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +55,16 @@ public class ContainerTests {
         int d = 13;
         String s = String.format("APP请求频率过高 %d", null);
         System.out.println(s);
+    }
+
+    @Test
+    public void testUrlPath() throws Exception {
+        String urlString =
+                "https://video-livedvr-alihbp2.oss-cn-beijing-internal.aliyuncs.com/gifshow/1eCI_FDd0B8.1750419389422.alihbp2.jpg?Expires=1751202425&OSSAccessKeyId=AIpLOPXLM5iVFUk1&Signature=rIbyKGSbflw8l2Si0L7uYgvUXw0%3D";
+        URL url = new URL(urlString);
+        String path = url.getPath(); // "/video/abc.flv"
+        String filename = Paths.get(path).getFileName().toString(); // "abc.flv"
+        System.out.println(filename);
     }
 
     @Test

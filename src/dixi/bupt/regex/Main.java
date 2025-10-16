@@ -36,6 +36,55 @@ public class Main {
         System.out.println("简单异常类名: " + simpleExceptionName);
     }
 
+    @Test
+    public void testSplitSeparator() {
+        String s = "asd";
+        s = unescapePattern(s);
+        String[] seps = s.split("\\|");
+        for (int i = 0; i < seps.length; i++) {
+            seps[i] = Pattern.quote(seps[i]);
+        }
+        for (int i = 0; i < seps.length; i++) {
+            System.out.println(seps[i]);
+        }
+
+        String separatorPattern = String.join("|", seps);
+        String content = "asd\nasdasd\nasdasdasd";
+        String[] segments = content.split(separatorPattern);
+
+        for (String segment : segments) {
+            System.out.println(segment);
+        }
+        System.out.println(segments.length);
+    }
+
+    /**
+     * 处理分隔符的转义并创建分割模式
+     * @param separatorPattern 原始分隔符（可能包含转义字符）
+     * @return 处理后的分割模式
+     */
+    public static String createSplitPattern(String separatorPattern) {
+        try {
+            // 处理常见的转义序列
+            String unescaped = unescapePattern(separatorPattern);
+            // 创建后行断言模式
+            return "(?<=" + unescaped + ")";
+        } catch (Exception e) {
+            // 发生错误时返回默认的换行符模式
+            return "(?<=\n)";
+        }
+    }
+
+    /**
+     * 处理转义字符
+     */
+    private static String unescapePattern(String pattern) {
+        return pattern
+                .replaceAll("\\\\n", "\n")   // 处理换行符
+                .replaceAll("\\\\t", "\t")   // 处理制表符
+                .replaceAll("\\\\r", "\r");  // 处理回车符
+    }
+
     public static String extractValueByRegex(String input, String key) {
         String regex = key + ": (.+?)( |$)";
         Pattern pattern = Pattern.compile(regex);

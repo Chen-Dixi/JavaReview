@@ -58,4 +58,12 @@ public class LearnArrayList {
             System.out.println(i);
         }
     }
+
+    @Test
+    public void testArray() {
+        String scope = "";
+        String[] splited = scope.split(",");
+        List<String> list = Arrays.asList(splited);
+        System.out.println(list);
+    }
 }
